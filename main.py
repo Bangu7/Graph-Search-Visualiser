@@ -1,18 +1,20 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import graph
 
-def create_graph(nodes: list, edges: list) -> nx.graph:
-    G = nx.Graph()
-    G.add_nodes_from(nodes)
-    G.add_edges_from(edges)
-    return G
+def update(frame):
+    if frame >= 10:
+        return 
 
 def draw_graph(G: nx.graph) -> None:
-    nx.draw(G, with_labels=True, font_weight='bold')
+    fig, ax = plt.subplots()
+    nx.draw(G, with_labels=True, font_weight='bold', node_color='skyblue')
+    animation.FuncAnimation(fig=fig, func=update)
     plt.show()
 
 def main():
-    G = create_graph([1, 2, 3, 4], [(1, 2), (2, 3)])
+    G = graph.Graph(nodes=[1, 2, 3, 4], edges=[(1, 2), (2, 3)])
     draw_graph(G)
 
 if __name__ == "__main__":
