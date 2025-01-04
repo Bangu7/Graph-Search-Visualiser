@@ -8,12 +8,12 @@ A way to visualise graph searching algorithms.
   - [ ] DFS
   - [ ] UCS
   - [ ] A-Star
-  - Directed
-      - [ ] Dijkstra's
+  - [ ] Dijkstra's
 - Interactivity
   - [ ] Add and remove nodes/edges in GUI
   - [ ] Ability to step through the algorithm when wanted (Possibly backwards)
   - [ ] Click to set start/goal
   - [ ] Change Colours
 - Misc
+  - [ ] Directed Graphs
   - [ ] Randomised Option
