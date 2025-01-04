@@ -17,3 +17,4 @@ A way to visualise graph searching algorithms.
 - Misc
   - [ ] Directed Graphs
   - [ ] Randomised Option
+  - [ ] View current state of graph
