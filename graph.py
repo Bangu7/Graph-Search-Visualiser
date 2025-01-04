@@ -1,5 +1,16 @@
 import networkx as nx
 
+"""
+A base structure for a graph utilising networkx.
+
+Params:
+    nodes: a list of graph node ids
+    edges: a list with edges to connect chosen node ids (Doesn't require node to exist)
+    start: the node id of the starting node (Practical for algorithms)
+    goal: node id of end point/goal
+    default_colour: the default colour for each node
+
+"""
 class Graph():
     def __init__(
         self,
@@ -34,12 +45,18 @@ class Graph():
         self._goal = goal
 
 
+"""
+An extension of the Graph class into a BFS search algorithm. 
+Each step of the algorithm can be done one at a time.
+"""
 class BFSGraph(Graph):
     def __init__(self, nodes: list, edges: list[tuple], start: int, goal: int, default_colour: str = 'skyblue') -> None:
         super().__init__(nodes, edges, start, goal, default_colour)
         self._frontier = [self._start]
         self._visited = set()
-        self._solved = False        
+        self._solved = False
+        self._temp_adj = []
+        self._cur_node = None    
     
     def step(self) -> None:
         if not len(self._frontier) or self._solved:
@@ -50,13 +67,19 @@ class BFSGraph(Graph):
             self._graph.nodes[self._start]['color'] = 'red'
             return
         
-        cur = self._frontier.pop(0)
-        for vertex in self._graph.adj[cur]:
-            if vertex == self._goal:
-                self._graph.nodes[vertex]['color'] = 'green'
-                self._solved = True
-                return
-            if vertex not in self._visited:
-                self._frontier.append(vertex)
-                self._visited.add(vertex)
-                self._graph.nodes[vertex]['color'] = 'red'
+        if not self._temp_adj:
+            self._cur_node = self._frontier.pop(0)
+            for vertex in self._graph.adj[self._cur_node]:
+                self._temp_adj.append(vertex)
+
+        cur_adj = self._temp_adj.pop(0)
+        if cur_adj == self._goal:
+            self._graph.nodes[cur_adj]['color'] = 'green'
+            self._graph[cur_adj][self._cur_node]['color'] = 'green'
+            self._solved = True
+            return
+        if cur_adj not in self._visited:
+            self._frontier.append(cur_adj)
+            self._visited.add(cur_adj)
+            self._graph.nodes[cur_adj]['color'] = 'red'
+            self._graph[cur_adj][self._cur_node]['color'] = 'red'
