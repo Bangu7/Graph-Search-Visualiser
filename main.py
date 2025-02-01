@@ -26,10 +26,10 @@ def main(args: argparse.Namespace):
     edges = [(i, i + 1) for i in range(total - 1)]
     edges.extend([(i, i + 2) for i in range(total - 1)])
     edges.extend([(i, i + 3) for i in range(total - 1)])
-    edges.extend([(i, i + 4) for i in range(total - 1)])
+    # edges.extend([(i, i + 4) for i in range(total - 1)])
     
     if args.BFS:
-        G = graph.BFSGraph(nodes=[i for i in range(total)], edges=edges, start=5, goal=10)
+        G = graph.BFSGraph(nodes=[i for i in range(total)], edges=edges, start=5, goal=13)
         draw_graph(G)
     elif args.DFS:
         print("DFS is not yet implemented.")
