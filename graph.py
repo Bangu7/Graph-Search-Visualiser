@@ -47,6 +47,8 @@ class Graph():
     def remove_node(self, id):
         self._graph.remove_node(id)
 
+    def reset(self):
+        pass
 
 """
 An extension of the Graph class into a BFS search algorithm. 
@@ -73,16 +75,16 @@ class BFSGraph(Graph):
 
     def step(self) -> None:
         # print(self._frontier)
-        if not len(self._frontier) or self._solved:
+        if not (len(self._frontier) or self._temp_adj) or self._solved:
             return
         
         if not len(self._visited):
             self._visited.add(self._start)
-            self._graph.nodes[self._start]['color'] = 'red'
+            self._graph.nodes[self._start]['color'] = 'purple'
             return
         
         if not self._temp_adj:
-            if self._cur_node:
+            if self._cur_node is not None:
                 self._graph.nodes[self._cur_node]['color'] = 'red'
             self._cur_node = self._frontier.pop(0)
             self._graph.nodes[self._cur_node]['color'] = 'purple'
@@ -104,7 +106,7 @@ class BFSGraph(Graph):
             self.step()
 
     def remove_node(self, id):
-        if self._cur_node == id:
+        if self._cur_node == id or self._start == id or self._goal == id:
             return True
         self._graph.remove_node(id)
         if id in self._frontier:
@@ -114,3 +116,17 @@ class BFSGraph(Graph):
         if id in self._temp_adj:
             self._temp_adj.remove(id)
         return False
+    
+    def reset(self):
+        self._frontier = [self._start]
+        self._visited = set()
+        self._solved = False
+        self._temp_adj = []
+        self._cur_node = None
+
+        for node in self._graph.nodes():
+            self._graph.nodes[node]['color'] = self._default_colour
+            for other in self._graph.adj[node]:
+                self._graph[node][other]['color'] = 'black'
+        # nx.set_node_attributes(self._graph, 'color', self._default_colour)
+        # nx.set_edge_attributes(self._graph, 'color', 'black')
