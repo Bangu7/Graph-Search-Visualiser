@@ -1,16 +1,19 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.widgets import Button
 import graph
 import argparse
 import sys
+
+paused = False
 
 def draw_graph(G: graph.Graph) -> None:
     fig, ax = plt.subplots()
     pos = nx.spring_layout(G._graph)
 
     def update(frame):
-        if G._solved:
+        if G._solved or paused:
             return
         G.step()
         ax.clear()
@@ -18,7 +21,34 @@ def draw_graph(G: graph.Graph) -> None:
         edge_colors = [G._graph[u][v].get('color', 'black') for u, v in G._graph.edges]
         nx.draw(G._graph, ax=ax, pos=pos, with_labels=True, node_color=node_colors, edge_color=edge_colors)
 
-    anim = animation.FuncAnimation(fig=fig, func=update, frames=range(100), blit=False, repeat=False, interval=500)
+    def on_click(event):
+        if event.inaxes != ax or not paused:
+            return
+        for node, (x,y) in pos.items():
+            distance = (event.xdata - x) ** 2 + (event.ydata - y) ** 2
+            if distance < 0.005:
+                is_cur = G.remove_node(node)
+                if is_cur:
+                    print("Can't remove current node")
+                    return
+                print(f"removed node {node}")
+                ax.clear()
+                node_colors = [G._graph.nodes[node].get('color', 'skyblue') for node in G._graph.nodes]
+                edge_colors = [G._graph[u][v].get('color', 'black') for u, v in G._graph.edges]
+                nx.draw(G._graph, ax=ax, pos=pos, with_labels=True, node_color=node_colors, edge_color=edge_colors)
+                break
+    
+    def toggle_pause(event):
+        global paused
+        paused = not paused
+
+    cid = fig.canvas.mpl_connect('button_press_event', on_click)
+
+    ax_button = plt.axes([0.8, 0.01, 0.1, 0.1])
+    button = Button(ax_button, 'Pause/Play')
+    button.on_clicked(toggle_pause)
+
+    anim = animation.FuncAnimation(fig=fig, func=update, frames=range(100), blit=False, repeat=True, interval=500)
     plt.show()
 
 def main(args: argparse.Namespace):
