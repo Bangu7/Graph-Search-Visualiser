@@ -10,11 +10,14 @@ A way to visualise graph searching algorithms.
   - [ ] A-Star
   - [ ] Dijkstra's
 - Interactivity
-  - [ ] Add and remove nodes/edges in GUI
+  - [x] Remove nodes/edges in GUI
+  - [ ] Add nodes/edges in GUI
+  - [x] Reset graph
+  - [x] Pause/Play button
   - [ ] Ability to step through the algorithm when wanted (Possibly backwards)
   - [ ] Click to set start/goal
   - [ ] Change Colours
 - Misc
   - [ ] Directed Graphs
   - [ ] Randomised Option
-  - [ ] View current state of graph
+  - [ ] View the current state of the graph algorithm
