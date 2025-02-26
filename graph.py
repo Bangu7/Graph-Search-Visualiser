@@ -46,6 +46,9 @@ class Graph():
 
     def remove_node(self, id):
         self._graph.remove_node(id)
+    
+    def add_edge_line(self, id1, id2):
+        pass
 
     def reset(self):
         pass
@@ -60,6 +63,7 @@ class BFSGraph(Graph):
         self._frontier = [self._start]
         self._visited = set()
         self._solved = False
+        self._impossible = False
         self._temp_adj = []
         self._cur_node = None
         self._skip_step = skip_step
@@ -72,10 +76,15 @@ class BFSGraph(Graph):
     
     def is_solved(self):
         return self._solved
+    
+    def is_impossible(self):
+        return self._impossible
 
     def step(self) -> None:
-        # print(self._frontier)
-        if not (len(self._frontier) or self._temp_adj) or self._solved:
+        if self._solved:
+            return
+        elif not (len(self._frontier) or self._temp_adj):
+            self._impossible = True
             return
         
         if not len(self._visited):
@@ -88,6 +97,8 @@ class BFSGraph(Graph):
                 self._graph.nodes[self._cur_node]['color'] = 'red'
             self._cur_node = self._frontier.pop(0)
             self._graph.nodes[self._cur_node]['color'] = 'purple'
+            if not self._graph.adj[self._cur_node]:
+                return
             for vertex in self._graph.adj[self._cur_node]:
                 self._temp_adj.append(vertex)
 
@@ -106,8 +117,12 @@ class BFSGraph(Graph):
             self.step()
 
     def remove_node(self, id):
+        if not self._graph.has_node(id):
+            return -1
+
         if self._cur_node == id or self._start == id or self._goal == id:
-            return True
+            return 1
+
         self._graph.remove_node(id)
         if id in self._frontier:
             self._frontier.remove(id)
@@ -115,12 +130,21 @@ class BFSGraph(Graph):
             self._visited.remove(id)
         if id in self._temp_adj:
             self._temp_adj.remove(id)
-        return False
+        return 0
     
+    def add_edge_line(self, id1, id2):
+        if not self._graph.has_node(id1) or not self._graph.has_node(id2):
+            return -1
+        if id1 == id2:
+            return 1
+        self._graph.add_edge(id1, id2)
+        return 0
+
     def reset(self):
         self._frontier = [self._start]
         self._visited = set()
         self._solved = False
+        self._impossible = False
         self._temp_adj = []
         self._cur_node = None
 
