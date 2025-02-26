@@ -11,6 +11,24 @@ helded = False
 x_pos = 0
 y_pos = 0
 
+def draw_graph_state(G, ax, pos):
+    ax.clear()
+    node_colors = [G._graph.nodes[node].get('color', 'skyblue') for node in G._graph.nodes]
+    edge_colors = [G._graph[u][v].get('color', 'black') for u, v in G._graph.edges]
+    nx.draw(G._graph, ax=ax, pos=pos, with_labels=True, node_color=node_colors, edge_color=edge_colors)
+
+def find_nodes_at_click(event, pos):
+    id1 = -1
+    id2 = -1
+    for node, (x,y) in pos.items():
+        distance1 = (event.xdata - x) ** 2 + (event.ydata - y) ** 2
+        distance2 = (x_pos - x) ** 2 + (y_pos - y) ** 2
+        if distance1 < 0.005:
+            id1 = node
+        if distance2 < 0.005:
+            id2 = node
+    return id1, id2
+
 def draw_graph(G: graph.Graph) -> None:
     fig, ax = plt.subplots()
     pos = nx.spring_layout(G._graph)
@@ -22,11 +40,8 @@ def draw_graph(G: graph.Graph) -> None:
         if G.is_solved() or paused:
             return
         G.step()
-        ax.clear()
-        node_colors = [G._graph.nodes[node].get('color', 'skyblue') for node in G._graph.nodes]
-        edge_colors = [G._graph[u][v].get('color', 'black') for u, v in G._graph.edges]
-        nx.draw(G._graph, ax=ax, pos=pos, with_labels=True, node_color=node_colors, edge_color=edge_colors)
-
+        draw_graph_state(G, ax, pos)
+        
     def on_click(event):
         global helded, x_pos, y_pos
         helded = True
@@ -40,20 +55,12 @@ def draw_graph(G: graph.Graph) -> None:
         if distance < 0.005:
             remove_node(event)
         else:
-            id1 = -1
-            id2 = -1
-            for node, (x,y) in pos.items():
-                distance1 = (event.xdata - x) ** 2 + (event.ydata - y) ** 2
-                distance2 = (x_pos - x) ** 2 + (y_pos - y) ** 2
-                if distance1 < 0.005:
-                    id1 = node
-                if distance2 < 0.005:
-                    id2 = node
-            if not G.add_edge_line(id1, id2):
-                ax.clear()
-                node_colors = [G._graph.nodes[node].get('color', 'skyblue') for node in G._graph.nodes]
-                edge_colors = [G._graph[u][v].get('color', 'black') for u, v in G._graph.edges]
-                nx.draw(G._graph, ax=ax, pos=pos, with_labels=True, node_color=node_colors, edge_color=edge_colors)
+            id1, id2 = find_nodes_at_click(event, pos)
+            if G._graph.has_edge(id1, id2):
+                G.remove_edge_line(id1, id2)
+            else:
+                G.add_edge_line(id1, id2) 
+            draw_graph_state(G, ax, pos)
 
     def remove_node(event):
         if event.inaxes != ax or not paused:
@@ -68,12 +75,16 @@ def draw_graph(G: graph.Graph) -> None:
                     print("Can't remove current node")
                     return
                 print(f"Removed node {node}")
-                ax.clear()
-                node_colors = [G._graph.nodes[node].get('color', 'skyblue') for node in G._graph.nodes]
-                edge_colors = [G._graph[u][v].get('color', 'black') for u, v in G._graph.edges]
-                nx.draw(G._graph, ax=ax, pos=pos, with_labels=True, node_color=node_colors, edge_color=edge_colors)
-                break
+                draw_graph_state(G, ax, pos)
+                return
+        add_node(event)
     
+    def add_node(event):
+        id = G._max_node + 1
+        G.add_node(id)
+        pos[id] = (event.xdata, event.ydata)
+        draw_graph_state(G, ax, pos)
+
     def toggle_pause(event):
         global paused
         paused = not paused
@@ -81,10 +92,7 @@ def draw_graph(G: graph.Graph) -> None:
     def reset(event):
         G.reset()
         ax.clear()
-        # pos = nx.spring_layout(G._graph)
-        node_colors = [G._graph.nodes[node].get('color', 'skyblue') for node in G._graph.nodes]
-        edge_colors = [G._graph[u][v].get('color', 'black') for u, v in G._graph.edges]
-        nx.draw(G._graph, ax=ax, pos=pos, with_labels=True, node_color=node_colors, edge_color=edge_colors)
+        draw_graph_state(G, ax, pos)
 
     cid = fig.canvas.mpl_connect('button_press_event', on_click)
     cid = fig.canvas.mpl_connect('button_release_event', on_release)
@@ -103,9 +111,9 @@ def draw_graph(G: graph.Graph) -> None:
 def main(args: argparse.Namespace):
     total = 15
     edges = [(i, i + 1) for i in range(total - 1)]
-    edges.extend([(i, i + 2) for i in range(total - 1)])
-    edges.extend([(i, i + 3) for i in range(total - 1)])
-    # edges.extend([(i, i + 4) for i in range(total - 1)])
+    edges.extend([(i, i + 2) for i in range(total - 2)])
+    edges.extend([(i, i + 3) for i in range(total - 3)])
+    # edges.extend([(i, i + 4) for i in range(total - 4)])
     
     if args.BFS:
         G = graph.BFSGraph(nodes=[i for i in range(total)], edges=edges, start=5, goal=13)

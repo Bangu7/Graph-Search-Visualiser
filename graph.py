@@ -67,6 +67,7 @@ class BFSGraph(Graph):
         self._temp_adj = []
         self._cur_node = None
         self._skip_step = skip_step
+        self._max_node = nodes[-1]
     
     def get_frontier(self):
         return self._frontier
@@ -139,6 +140,14 @@ class BFSGraph(Graph):
             return 1
         self._graph.add_edge(id1, id2)
         return 0
+    
+    def remove_edge_line(self, id1, id2):
+        if not self._graph.has_node(id1) or not self._graph.has_node(id2):
+            return -1
+        if id1 == id2:
+            return 1
+        self._graph.remove_edge(id1, id2)
+        return 0
 
     def reset(self):
         self._frontier = [self._start]
@@ -154,3 +163,7 @@ class BFSGraph(Graph):
                 self._graph[node][other]['color'] = 'black'
         # nx.set_node_attributes(self._graph, 'color', self._default_colour)
         # nx.set_edge_attributes(self._graph, 'color', 'black')
+    
+    def add_node(self, id, colour = None):
+        self._max_node = id
+        return super().add_node(id, colour)
